@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>카드뉴스 편집기</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Do+Hyeon&family=Jua&family=Nanum+Myeongjo:wght@700;800&family=Noto+Sans+KR:wght@400;500;700;900&display=block">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="css/fonts.css">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="logo-title">카드뉴스 편집기</div>
+  <button id="btnImport" class="primary">⬇ 포스트 가져오기</button>
+  <div class="sep"></div>
+  <button id="btnNew">새 프로젝트</button>
+  <button id="btnOpen" title="프로젝트 폴더에 저장한 프로젝트 목록">📁 프로젝트</button>
+  <button id="btnSaveFile" title="프로젝트 폴더에 이름 붙여 저장 (Ctrl+S)">💾 저장</button>
+  <span id="projName" class="proj-name" title="클릭: 다른 이름으로 저장">이름 없음</span>
+  <div class="sep"></div>
+  <button id="btnUndo" title="실행 취소 (Ctrl+Z)">↶</button>
+  <button id="btnRedo" title="다시 실행 (Ctrl+Shift+Z / Ctrl+Y)">↷</button>
+  <div class="sep"></div>
+  <button id="btnZoomOut" title="축소">−</button>
+  <span id="zoomLabel" class="zoom-label">50%</span>
+  <button id="btnZoomIn" title="확대">+</button>
+  <button id="btnZoomFit" title="화면에 맞춤">맞춤</button>
+  <div class="spacer"></div>
+  <button id="btnUpdate" class="update-btn" style="display:none" title="새 버전 받기">🔔 업데이트 하기</button>
+  <span id="taskState" class="task-state" style="display:none"></span>
+  <span id="saveState" class="save-state"></span>
+  <button id="btnHelp" title="사용설명서">📖 설명서</button>
+  <button id="btnCaption">캡션</button>
+  <button id="btnSettings">⚙ 설정</button>
+  <select id="exportFormat" title="내보내기 형식">
+    <option value="jpeg">JPG</option>
+    <option value="png">PNG</option>
+  </select>
+  <button id="btnExportOne">현재 장 저장</button>
+  <button id="btnExportAll" class="primary" title="업로드폴더\오늘날짜 폴더에 장별로 저장 (Shift+클릭: ZIP으로 받기)">전체 저장 (업로드폴더)</button>
+  <button id="btnOpenExport" title="마지막으로 저장한 폴더 열기">📂</button>
+</header>
+
+<main class="layout">
+  <aside class="slides-panel">
+    <div class="panel-title">슬라이드 <button id="btnAddSlide" class="small" title="슬라이드 추가">+ 추가</button></div>
+    <div id="slideList" class="slide-list"></div>
+  </aside>
+
+  <nav class="toolbar" id="toolbar">
+    <button data-tool="text" title="텍스트 추가"><b>T</b><span>텍스트</span></button>
+    <button data-tool="image" title="이미지 추가"><b>🖼</b><span>이미지</span></button>
+    <button data-tool="circleFrame" title="원형 사진 (인물 사진 동그라미)"><b>◉</b><span>원형사진</span></button>
+    <button data-tool="rectFrame" title="사각 사진 프레임 (자르기)"><b>▣</b><span>프레임</span></button>
+    <button data-tool="rect" title="사각형"><b>■</b><span>사각형</span></button>
+    <button data-tool="circle" title="원"><b>●</b><span>원</span></button>
+    <button data-tool="gradient" title="그라데이션 오버레이"><b>▤</b><span>그라데</span></button>
+    <button data-tool="divider" title="구분선 + 로고"><b>—◎—</b><span>구분선</span></button>
+    <button data-tool="logo" title="로고"><b>★</b><span>로고</span></button>
+    <button data-tool="brand" title="브랜드명 텍스트"><b>Aa</b><span>브랜드</span></button>
+    <button data-tool="dots" title="페이지 점"><b>•••</b><span>페이지점</span></button>
+    <button data-tool="search" title="인터넷에서 원본·비슷한 이미지 찾기" class="tool-search"><b>🔎</b><span>이미지찾기</span></button>
+    <button data-tool="merge" title="사진 두 장을 경계가 자연스럽게 섞인 한 장으로"><b>◧</b><span>두장합치기</span></button>  </nav>
+
+  <div class="stage-wrap">
+    <section class="stage" id="stage">
+      <div class="canvas-wrap" id="canvasWrap"><canvas id="c"></canvas></div>
+    </section>
+    <div class="stage-floats">
+      <button id="btnLockSel" title="켜면: 레이어를 선택한 뒤 어디를 드래그해도 그 레이어만 움직여요 (위에 다른 이미지가 있어도). Ctrl+클릭으로 다른 레이어 선택">🎯 선택 레이어만 이동</button>
+      <button id="btnOutside" title="카드 밖으로 나간 이미지 보이기/숨기기">◫ 바깥 보기</button>
+    </div>
+  </div>
+
+  <aside class="right-panel">
+    <div class="props-area">
+      <div class="panel-title">속성</div>
+      <div id="props"></div>
+    </div>
+    <div class="layers-area">
+      <div class="panel-title">레이어
+        <span class="layer-btns">
+          <button class="small" id="lyUp" title="앞으로 (Ctrl+])">▲</button>
+          <button class="small" id="lyDown" title="뒤로 (Ctrl+[)">▼</button>
+          <button class="small" id="lyDup" title="복제 (Ctrl+D)">⧉</button>
+          <button class="small" id="lyDel" title="삭제 (Del)">🗑</button>
+        </span>
+      </div>
+      <div id="layers" class="layers"></div>
+    </div>
+  </aside>
+</main>
+
+<!-- 슬라이드 추가 메뉴 -->
+<div class="modal" id="addSlideModal">
+  <div class="modal-box">
+    <h2>슬라이드 추가</h2>
+    <div class="tpl-grid">
+      <button data-tpl="cover"><b>커버형</b><span>사진 + 하단 그라데이션 + 구분선/로고 + 큰 제목</span></button>
+      <button data-tpl="body"><b>본문형</b><span>사진 + 하단 그라데이션 + 본문 텍스트</span></button>
+      <button data-tpl="quote"><b>인용형</b><span>큰 따옴표 + 인용문 + 아래에 얇은 '-말한 사람'</span></button>
+      <button data-tpl="photo"><b>사진형</b><span>사진 꽉 채우기 + 좌상단 로고</span></button>
+      <button data-tpl="white"><b>밝은 배경형</b><span>밝은 배경 + 좌상단 로고 + 설명</span></button>
+      <button data-tpl="blank"><b>빈 슬라이드</b><span>검은 배경만</span></button>
+    </div>
+    <div class="modal-actions"><button data-close>닫기</button></div>
+  </div>
+</div>
+
+<!-- 포스트 가져오기 -->
+<div class="modal" id="importModal">
+  <div class="modal-box wide">
+    <h2>해외 인스타 포스트 → 카드뉴스 만들기</h2>
+    <p class="desc">인스타그램은 외부에서 게시물을 직접 불러올 수 없어요. 게시물 <b>캡션을 복사해 붙여넣고</b>, 저장한 <b>이미지(HEIC 포함)</b>를 끌어다 놓아 주세요.</p>
+    <div class="grid2">
+      <div>
+        <label class="lbl">원문 캡션 / 내용</label>
+        <textarea id="impText" rows="13" placeholder="해외 게시물 캡션(영어 등)을 그대로 붙여넣으세요.&#10;&#10;수동 모드에서는 빈 줄로 구분된 문단마다 한 장씩 만들어지고, 첫 문단이 커버가 됩니다.&#10;*별표*로 감싼 부분은 노란색 강조가 됩니다."></textarea>
+        <label class="lbl">인스타 게시물 링크 → 사진·캡션 자동으로 불러오기</label>
+        <div class="ctrl"><input id="impUrl" type="text" placeholder="https://www.instagram.com/p/..."><button id="impFetch">불러오기</button></div>
+        <div class="ig-help">
+          인스타가 로그인 없이 읽는 걸 막으면 링크로는 안 될 수 있어요. 그럴 땐 →
+          <a id="igBookmarklet" class="bookmarklet" href="#" title="이 버튼을 북마크바로 끌어다 놓으세요">📌 카드뉴스로 보내기</a>
+          를 <b>북마크바로 끌어다 놓고</b>, 인스타에서 게시물을 연 상태로 그 북마크를 누르세요.
+        </div>
+      </div>
+      <div>
+        <label class="lbl">게시물 이미지 <span class="muted">(끌어서 순서 변경 · ★ = 커버 원형 인물사진)</span></label>
+        <div id="impDrop" class="dropzone">여기에 이미지를 끌어다 놓거나 클릭해서 선택<br><span class="muted">Ctrl+V로 붙여넣기도 됩니다 · JPG/PNG/WEBP/HEIC</span></div>
+        <div id="impThumbs" class="imp-thumbs"></div>
+      </div>
+    </div>
+    <div class="row-inline">
+      <label><input type="radio" name="impMode" value="ai" checked> AI 자동 구성 (Claude · 번역/요약/강조)</label>
+      <label><input type="radio" name="impMode" value="manual"> 수동 (빈 줄 기준 한 장씩)</label>
+      <label title="AI 자동 구성에서 만들 카드 수">카드 수
+        <select id="impCount" style="width:auto">
+          <option value="same">원본과 같게 (사진 수)</option>
+          <option value="auto">AI가 알아서</option>
+          <option value="3">3장</option><option value="4">4장</option><option value="5">5장</option>
+          <option value="6">6장</option><option value="7">7장</option><option value="8">8장</option>
+          <option value="10">10장</option>
+        </select>
+      </label>
+      <span class="spacer"></span>
+      <label><input type="checkbox" id="impReplace" checked> 기존 슬라이드 교체</label>
+    </div>
+    <div class="row-inline">
+      <label title="이미지 1장당 SerpApi 검색 1회 사용 (같은 이미지는 한 번만)"><input type="checkbox" id="impAutoLens"> 만든 뒤 모든 카드 원본 찾기 (비슷한 이미지)</label>
+      <label title="원본/비슷한 사진 중 글씨·로고 없는 깨끗한 고화질 사진을 AI가 골라 배경을 바꿔요. 없으면 TMDB의 글씨 없는 포스터·스틸컷. 마음에 안 들면 Ctrl+Z"><input type="checkbox" id="impAutoReplace"> 글씨 없는 깔끔한 사진으로 배경 자동 교체</label>
+      <span class="muted" id="impAutoNote"></span>
+    </div>
+    <div id="impStatus" class="status"></div>
+    <div class="modal-actions"><button data-close>취소</button><button id="impGo" class="primary">카드뉴스 만들기</button></div>
+  </div>
+</div>
+
+<!-- 설정 -->
+<div class="modal" id="settingsModal">
+  <div class="modal-box wide">
+    <h2>설정</h2>
+    <div class="grid2">
+      <div>
+        <label class="lbl">강조색 (바꾸면 모든 슬라이드에 적용)</label>
+        <div class="ctrl"><input type="color" id="setAccent"><input type="text" id="setAccentHex" class="hex"></div>
+        <label class="lbl">브랜드명</label>
+        <input type="text" id="setBrand">
+        <label class="lbl">로고 이미지 (투명 PNG 권장 · 모든 슬라이드의 로고가 바뀝니다)</label>
+        <div class="ctrl"><img id="setLogoPreview" class="logo-preview" alt=""><button id="setLogoBtn">로고 업로드</button><button id="setLogoReset">기본 로고</button></div>
+        <label class="lbl">전체 저장 폴더 (안에 오늘 날짜 폴더를 만들어 장별로 저장)</label>
+        <input type="text" id="setExportDir" placeholder="비워두면: 문서\insta_auto_upload\업로드폴더 (없으면 문서\카드뉴스 저장)">
+        <label class="lbl" style="font-weight:normal"><input type="checkbox" id="setExportCaption"> 캡션(caption.txt)도 함께 저장 — <b style="color:#ff6b6b">자동 업로드 프로그램이 바로 인스타에 게시해요</b></label>
+        <label class="lbl">다른 사람에게 공유</label>
+        <div class="share-box">
+          <label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="checkbox" id="shareKeys" checked> 내 API 키(Claude·SerpApi·TMDB)와 AI 지시문 넣기</label>
+          <p class="hint">받은 사람은 키를 따로 넣지 않고 바로 써요. <b>요금은 전부 내 계정</b>으로 나가고, 받은 사람이 키를 꺼내 볼 수도 있어요. 믿을 수 있는 사람에게만 주세요.</p>
+          <button id="shareMake" class="primary">📦 공유용 압축파일 만들기</button>
+        </div>
+        <label class="lbl">버전 · 업데이트</label>
+        <div class="ctrl"><span id="verInfo" class="muted">확인 중…</span><button id="verCheck">업데이트 확인</button></div>
+        <label class="lbl">내 폰트 추가 (.ttf / .otf / .woff)</label>
+        <div class="ctrl"><button id="setFontBtn">폰트 파일 추가</button><span id="setFontList" class="muted"></span></div>
+      </div>
+      <div>
+        <label class="lbl">Claude API 키 (AI 자동 구성용 · 이 브라우저에만 저장)</label>
+        <input type="password" id="setApiKey" placeholder="sk-ant-...">
+        <label class="lbl">모델</label>
+        <input type="text" id="setModel">
+        <label class="lbl">SerpApi 키 (원본 역검색 · Google 이미지 검색) <a href="https://serpapi.com" target="_blank" rel="noopener">가입</a></label>
+        <input type="password" id="setSerpKey" placeholder="SerpApi API key">
+        <label class="lbl">TMDB 키 (영화·드라마 스틸컷, 배우 사진 · 무료) <a href="https://www.themoviedb.org/settings/api" target="_blank" rel="noopener">발급</a></label>
+        <input type="password" id="setTmdbKey" placeholder="API 키 또는 읽기 액세스 토큰">
+        <label class="lbl">AI 지시문 (카드뉴스 말투·구성 규칙) <button class="small" id="setPromptReset">기본값</button></label>
+        <textarea id="setPrompt" rows="12"></textarea>
+      </div>
+    </div>
+    <div class="modal-actions"><button data-close>취소</button><button id="setSave" class="primary">저장</button></div>
+  </div>
+</div>
+
+<!-- 이미지 찾기 -->
+<div class="modal" id="searchModal">
+  <div class="modal-box wide">
+    <h2>이미지 찾기 <span class="muted" id="srTarget"></span></h2>
+    <div class="sr-tabs">
+      <button data-src="lens">🔍 원본 찾기 (사진으로 역검색)</button>
+      <button data-src="google">🌐 키워드 검색 (Google 이미지)</button>
+      <button data-src="pinterest">📌 핀터레스트</button>
+      <button data-src="tmdb">🎬 영화·인물 (TMDB)</button>
+    </div>
+    <div class="sr-bar">
+      <div id="srLensOpts" class="sr-opts">
+        <img id="srLensImg" class="sr-lens-img" alt="">
+        <select id="srLensType">
+          <option value="visual_matches">비슷한 이미지 (글자 없는 원본 포함)</option>
+          <option value="exact_matches">똑같은 이미지만</option>
+        </select>
+        <input type="text" id="srLensQ" placeholder="추가 검색어 (선택) 예: HD still">
+      </div>
+      <div id="srQueryOpts" class="sr-opts">
+        <input type="text" id="srQuery">
+        <label class="chk"><input type="checkbox" id="srLarge" checked> 큰 이미지만</label>
+      </div>
+      <button id="srGo" class="primary">검색</button>
+      <button id="srAI" title="사진·슬라이드 문구·원문을 Claude가 분석해서 검색어를 뽑아요">🤖 AI 키워드 추출</button>
+      <button id="srFile" style="display:none" title="검색 대신 내 컴퓨터의 사진 넣기">📁 내 파일</button>
+    </div>
+    <div id="srHistory" class="sr-history"></div>
+    <div id="srKeywords"></div>
+    <div id="srStatus" class="status"></div>
+    <div id="srResults" class="sr-results"></div>
+    <div class="row-inline" id="srApplyRow">
+      <b>적용:</b>
+      <label id="srApplyReplace"><input type="radio" name="srApply" value="replace"> 선택한 사진 교체</label>
+      <label id="srApplyReplaceBg"><input type="radio" name="srApply" value="replace-bg"> 배경 사진 교체</label>
+      <label><input type="radio" name="srApply" value="bg"> 새 배경으로 깔기</label>
+      <label><input type="radio" name="srApply" value="add"> 새 이미지로 추가</label>
+      <span class="spacer"></span>
+      <span class="muted">검색한 이미지는 저작권이 있을 수 있어요</span>
+    </div>
+    <div class="modal-actions"><button data-close>닫기</button></div>
+  </div>
+</div>
+
+<!-- 두 장 합치기 -->
+<div class="modal" id="mergeModal">
+  <div class="modal-box wide">
+    <h2>두 장 합치기 <span class="muted">— 경계가 자연스럽게 섞인 한 장으로</span></h2>
+    <div class="merge-grid">
+      <div class="merge-preview">
+        <canvas id="mgPreview" width="432" height="540"></canvas>
+        <p class="hint">미리보기에서 사진을 <b>드래그</b>하면 위치 이동, <b>휠</b>로 확대·축소</p>
+      </div>
+      <div class="merge-ctrls">
+        <div class="merge-slots">
+          <div class="merge-slot empty" data-slot="a">
+            <img alt="" title="클릭하거나 사진을 끌어다 놓기">
+            <div class="slot-name" id="mgSlotA">사진 1 (왼쪽)</div><div class="slot-q" id="mgQa"></div>
+            <div class="btn-row"><button data-pick="file">파일</button><button data-pick="search">🔎 검색</button><button data-pick="current">현재 사진</button></div>
+          </div>
+          <div class="merge-slot empty" data-slot="b">
+            <img alt="" title="클릭하거나 사진을 끌어다 놓기">
+            <div class="slot-name" id="mgSlotB">사진 2 (오른쪽)</div><div class="slot-q" id="mgQb"></div>
+            <div class="btn-row"><button data-pick="file">파일</button><button data-pick="search">🔎 검색</button><button data-pick="current">현재 사진</button></div>
+          </div>
+        </div>
+        <div class="btn-row"><button id="mgSwap">⇄ 사진 1·2 서로 바꾸기</button></div>
+        <div class="row"><label>방향</label><div class="ctrl"><button data-dir="h">◧ 가로로 나란히</button><button data-dir="v">⬒ 세로로 위아래</button></div></div>
+        <div class="row"><label>경계 위치</label><div class="ctrl"><input type="range" id="mgSplit" min="15" max="85" step="1"><input type="number" id="mgSplitN" class="mini" step="1"></div></div>
+        <div class="row"><label>부드러움</label><div class="ctrl"><input type="range" id="mgFeather" min="0" max="60" step="1"><input type="number" id="mgFeatherN" class="mini" step="1"></div></div>
+        <div class="row"><label>사진1 확대</label><div class="ctrl"><input type="range" id="mgZa" min="1" max="5" step="0.01"><input type="number" id="mgZaN" class="mini" step="0.01"></div></div>
+        <div class="row"><label>사진2 확대</label><div class="ctrl"><input type="range" id="mgZb" min="1" max="5" step="0.01"><input type="number" id="mgZbN" class="mini" step="0.01"></div></div>
+        <div class="row-inline">
+          <b>적용:</b>
+          <label id="mgApplyReplace"><input type="radio" name="mgApply" value="replace"> 이 합친 사진 고치기</label>
+          <label id="mgApplyBg"><input type="radio" name="mgApply" value="bg"> 배경 사진 교체</label>
+          <label><input type="radio" name="mgApply" value="add"> 새 이미지로 추가</label>
+        </div>
+      </div>
+    </div>
+    <div class="modal-actions"><button data-close>취소</button><button id="mgGo" class="primary">합치기</button></div>
+  </div>
+</div>
+
+<!-- 프로젝트 목록 -->
+<div class="modal" id="projectsModal">
+  <div class="modal-box wide">
+    <h2>프로젝트 <span class="muted" id="projFolder"></span></h2>
+    <div id="projList" class="proj-list"></div>
+    <div class="modal-actions">
+      <button id="projOpenFolder">📂 프로젝트 폴더 열기</button>
+      <button id="projFromFile" title="다른 곳에 있는 .json 프로젝트 파일 열기">파일에서 열기…</button>
+      <span class="spacer"></span>
+      <button data-close>닫기</button>
+    </div>
+  </div>
+</div>
+
+<!-- 캡션 -->
+<div class="modal" id="captionModal">
+  <div class="modal-box">
+    <h2>인스타 게시물 캡션</h2>
+    <textarea id="captionText" rows="14" placeholder="AI 자동 구성을 쓰면 캡션도 함께 만들어집니다. 직접 써도 돼요."></textarea>
+    <div class="modal-actions"><button data-close>닫기</button><button id="captionCopy" class="primary">복사</button></div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+<div id="busy" class="busy"><div class="spinner"></div><div id="busyText">처리 중...</div></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
+<script src="js/core.js"></script>
+<script src="js/objects.js"></script>
+<script src="js/editor.js"></script>
+<script src="js/panels.js"></script>
+<script src="js/io.js"></script>
+<script src="js/search.js"></script>
+<script src="js/merge.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

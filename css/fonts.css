@@ -1,0 +1,40 @@
+/* 눈누 무료 폰트 (상업적 이용 가능 여부는 각 폰트 라이선스를 확인하세요) */
+
+/* 페이퍼로지 — 김동댕 PSD 제목 폰트 (Paperlogy 7Bold). 설치돼 있으면 내 PC 폰트를 먼저 사용 */
+@font-face { font-family: 'Paperlogy'; font-weight: 400; font-display: block; src: local('Paperlogy-4Regular'), local('Paperlogy 4Regular'), url('https://fastly.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-4Regular.woff2') format('woff2'); }
+@font-face { font-family: 'Paperlogy'; font-weight: 500; font-display: block; src: local('Paperlogy-5Medium'), local('Paperlogy 5Medium'), url('https://fastly.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-5Medium.woff2') format('woff2'); }
+@font-face { font-family: 'Paperlogy'; font-weight: 600; font-display: block; src: local('Paperlogy-6SemiBold'), local('Paperlogy 6SemiBold'), url('https://fastly.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-6SemiBold.woff2') format('woff2'); }
+@font-face { font-family: 'Paperlogy'; font-weight: 700; font-display: block; src: local('Paperlogy-7Bold'), local('Paperlogy 7Bold'), url('https://fastly.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-7Bold.woff2') format('woff2'); }
+@font-face { font-family: 'Paperlogy'; font-weight: 800; font-display: block; src: local('Paperlogy-8ExtraBold'), local('Paperlogy 8ExtraBold'), url('https://fastly.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-8ExtraBold.woff2') format('woff2'); }
+@font-face { font-family: 'Paperlogy'; font-weight: 900; font-display: block; src: local('Paperlogy-9Black'), local('Paperlogy 9Black'), url('https://fastly.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-9Black.woff2') format('woff2'); }
+
+/* 프리젠테이션 — 김동댕 PSD 본문(7Bold)·말한 사람(1Thin) 폰트. 설치돼 있으면 내 PC 폰트를 먼저 사용 */
+@font-face { font-family: 'Freesentation'; font-weight: 100; font-display: block; src: local('Freesentation-1Thin'), local('Freesentation 1Thin'), url('https://fastly.jsdelivr.net/gh/projectnoonnu/2404@1.0/Freesentation-1Thin.woff2') format('woff2'); }
+@font-face { font-family: 'Freesentation'; font-weight: 200; font-display: block; src: local('Freesentation-2ExtraLight'), local('Freesentation 2ExtraLight'), url('https://fastly.jsdelivr.net/gh/projectnoonnu/2404@1.0/Freesentation-2ExtraLight.woff2') format('woff2'); }
+@font-face { font-family: 'Freesentation'; font-weight: 300; font-display: block; src: local('Freesentation-3Light'), local('Freesentation 3Light'), url('https://fastly.jsdelivr.net/gh/projectnoonnu/2404@1.0/Freesentation-3Light.woff2') format('woff2'); }
+@font-face { font-family: 'Freesentation'; font-weight: 400; font-display: block; src: local('Freesentation-4Regular'), local('Freesentation 4Regular'), url('https://fastly.jsdelivr.net/gh/projectnoonnu/2404@1.0/Freesentation-4Regular.woff2') format('woff2'); }
+@font-face { font-family: 'Freesentation'; font-weight: 500; font-display: block; src: local('Freesentation-5Medium'), local('Freesentation 5Medium'), url('https://fastly.jsdelivr.net/gh/projectnoonnu/2404@1.0/Freesentation-5Medium.woff2') format('woff2'); }
+@font-face { font-family: 'Freesentation'; font-weight: 600; font-display: block; src: local('Freesentation-6SemiBold'), local('Freesentation 6SemiBold'), url('https://fastly.jsdelivr.net/gh/projectnoonnu/2404@1.0/Freesentation-6SemiBold.woff2') format('woff2'); }
+@font-face { font-family: 'Freesentation'; font-weight: 700; font-display: block; src: local('Freesentation-7Bold'), local('Freesentation 7Bold'), url('https://fastly.jsdelivr.net/gh/projectnoonnu/2404@1.0/Freesentation-7Bold.woff2') format('woff2'); }
+@font-face { font-family: 'Freesentation'; font-weight: 800; font-display: block; src: local('Freesentation-8ExtraBold'), local('Freesentation 8ExtraBold'), url('https://fastly.jsdelivr.net/gh/projectnoonnu/2404@1.0/Freesentation-8ExtraBold.woff2') format('woff2'); }
+@font-face { font-family: 'Freesentation'; font-weight: 900; font-display: block; src: local('Freesentation-9Black'), local('Freesentation 9Black'), url('https://fastly.jsdelivr.net/gh/projectnoonnu/2404@1.0/Freesentation-9Black.woff2') format('woff2'); }
+@font-face {
+  font-family: 'GmarketSansBold';
+  src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansBold.woff') format('woff');
+  font-weight: normal; font-style: normal; font-display: block;
+}
+@font-face {
+  font-family: 'GmarketSansMedium';
+  src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansMedium.woff') format('woff');
+  font-weight: normal; font-style: normal; font-display: block;
+}
+@font-face {
+  font-family: 'SBAggroB';
+  src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2108@1.1/SBAggroB.woff') format('woff');
+  font-weight: normal; font-style: normal; font-display: block;
+}
+@font-face {
+  font-family: 'Cafe24Ssurround';
+  src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2105_2@1.0/Cafe24Ssurround.woff') format('woff');
+  font-weight: normal; font-style: normal; font-display: block;
+}
