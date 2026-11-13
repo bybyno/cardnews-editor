@@ -439,7 +439,7 @@ async function openHubInbox() {
         strip,
         h('div', { class: 'meta' },
           h('div', {}, h('div', { class: 't' }, it.name || '이름 없음'),
-            h('div', { class: 'd' }, `${dt.getMonth() + 1}/${dt.getDate()} ${String(dt.getHours()).padStart(2, '0')}:${String(dt.getMinutes()).padStart(2, '0')} · 카드 ${it.slides}장${it.cardH === 1080 ? ' · 1:1' : ''} · ${((it.size || 0) / 1048576).toFixed(1)}MB`)),
+            h('div', { class: 'd' }, `${dt.getMonth() + 1}/${dt.getDate()} ${String(dt.getHours()).padStart(2, '0')}:${String(dt.getMinutes()).padStart(2, '0')} · 카드 ${it.slides}장 · ${((it.size || 0) / 1048576).toFixed(1)}MB`)),
           h('div', { class: 'acts' }, openBtn, delBtn))));
     });
   } catch (e) { st.textContent = '목록을 못 불러왔어요: ' + e.message; st.classList.add('err'); }
@@ -483,7 +483,7 @@ function firstCardTitle() {
   });
   t = (t || any || '').replace(/\*/g, '').replace(/\s+/g, ' ').trim().slice(0, 60);
   const d = new Date();
-  return t || `카드뉴스 ${d.getMonth() + 1}.${d.getDate()}`;
+  return (t || `카드뉴스 ${d.getMonth() + 1}.${d.getDate()}`) + (H === 1080 ? ' (1:1)' : '');
 }
 function suggestProjectName() {
   // 첫 카드 제목 첫 줄 (별표 빼고) → 없으면 날짜
