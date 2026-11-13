@@ -21,7 +21,8 @@ def git(*args):
 git('add', '-A')
 # 키·개인 파일이 실수로 올라가지 않는지 마지막 확인 (.gitignore 가 지워졌을 때 대비)
 staged = subprocess.run(['git', '-c', 'core.quotepath=false', 'ls-files'], capture_output=True, text=True, encoding='utf-8').stdout.splitlines()
-bad = [p for p in staged if p.startswith(('프로젝트/', '받은 포스트/', '.claude/')) or p.endswith('shared_config.json')]
+bad = [p for p in staged if p.startswith(('프로젝트/', '받은 포스트/', '.claude/'))
+       or p.endswith(('shared_config.json', 'hub_config.json', '공유함_구글스크립트.txt'))]
 if bad:
     print('[중단] 올리면 안 되는 파일이 들어갔어요:', bad)
     subprocess.run(['git', 'reset', '-q'])

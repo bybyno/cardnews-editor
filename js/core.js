@@ -56,6 +56,9 @@ const defaultSettings = () => ({
   prompt: DEFAULT_PROMPT,
   customFonts: [],
   exportFormat: 'jpeg',
+  hubUrl: '',        // 구글 드라이브 공유함 주소 (Apps Script)
+  hubKey: '',        // 업로드 코드 (공유한 편집기에도 들어감)
+  hubAdminKey: '',   // 관리자 코드 (내 편집기만: 목록·열기·지우기)
   exportDir: '',   // 비우면 서버 기본값: 문서\insta_auto_upload\업로드폴더 (없으면 문서\카드뉴스 저장)
   exportWithCaption: false,   // 켜면 caption.txt까지 저장 → 자동 업로드 프로그램이 바로 게시
 });

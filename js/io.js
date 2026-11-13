@@ -358,13 +358,132 @@ function projectData() {
     app: 'insta-cardnews-editor', version: 1, savedAt: new Date().toISOString(), name: p.name || '', cardH: H,
     settings: { accent: state.settings.accent, brandName: state.settings.brandName, logo: state.settings.logo },
     project: { caption: p.caption || '', sourceUrl: p.sourceUrl || '', sourceText: p.sourceText || '', slides: p.slides.map(s => ({ id: s.id, json: s.json })) },
+    thumbs: p.slides.map(s => s.thumb || ''),   // 공유함에서 카드 미리보기로 보여줌
   };
 }
+/* ----- 공유함 (구글 드라이브 + Apps Script) ----- */
+async function hubCall(payload) {
+  const url = state.settings.hubUrl;
+  if (!url) throw new Error('⚙ 설정에 공유함 주소가 없어요');
+  const body = JSON.stringify(payload);
+  let r;
+  try {
+    // text/plain 이면 브라우저가 사전 확인 없이 바로 보냄 (Apps Script 가 받아줌)
+    r = await fetch(url, { method: 'POST', body, headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
+  } catch (e) {
+    if (!PROXY_OK) throw new Error('공유함에 연결하지 못했어요 (인터넷 연결 확인)');
+    r = await fetch('/proxy?url=' + encodeURIComponent(url), { method: 'POST', body, headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
+  }
+  let d;
+  try { d = await r.json(); } catch (e) { throw new Error('공유함 응답을 읽지 못했어요 (주소가 맞는지, 배포할 때 "모든 사용자"로 했는지 확인)'); }
+  if (d.error) throw new Error(d.error);
+  return d;
+}
+function syncHubButtons() {
+  const s = state.settings;
+  $('#btnHubUpload').style.display = s.hubUrl && (s.hubKey || s.hubAdminKey) ? '' : 'none';
+  $('#btnHubInbox').style.display = s.hubUrl && s.hubAdminKey ? '' : 'none';
+}
+function hubStrip(box, thumbs, cardH) {
+  box.innerHTML = '';
+  box.style.setProperty('--r', cardH === 1080 ? '1 / 1' : '4 / 5');
+  (thumbs || []).filter(t => /^data:image\/(jpeg|png|webp);base64,/.test(t || '')).forEach(t => box.append(h('img', { src: t, alt: '' })));
+}
+async function openHubUpload() {
+  leaveCurrent();
+  busy(true, '미리보기 만드는 중…');
+  try { await ensureThumbs(); } finally { busy(false); }
+  $('#hubUpDesc').textContent = `'${firstCardTitle()}' · 카드 ${slides().length}장을 공유함에 올려요.`;
+  hubStrip($('#hubUpStrip'), slides().map(s => s.thumb), H);
+  $('#hubUpStatus').textContent = ''; $('#hubUpStatus').classList.remove('err');
+  openModal('hubUpModal');
+}
+async function doHubUpload() {
+  const st = $('#hubUpStatus'), btn = $('#hubUpGo');
+  st.classList.remove('err');
+  const data = JSON.stringify(projectData());
+  if (data.length > 45 * 1048576) { st.textContent = '파일이 너무 커요 (45MB 넘음). 사진이 아주 큰 카드를 줄여주세요.'; st.classList.add('err'); return; }
+  btn.disabled = true;
+  st.textContent = `올리는 중… (${(data.length / 1048576).toFixed(1)}MB)`;
+  try {
+    await hubCall({
+      action: 'upload', key: state.settings.hubKey || state.settings.hubAdminKey,
+      name: firstCardTitle(),
+      slides: slides().length, cardH: H, thumbs: slides().slice(0, 6).map(s => s.thumb || ''), data,
+    });
+    closeModal('hubUpModal');
+    toast('📤 공유함에 올렸어요', 4000);
+  } catch (e) { st.textContent = '올리지 못했어요: ' + e.message; st.classList.add('err'); } finally { btn.disabled = false; }
+}
+async function openHubInbox() {
+  openModal('hubInModal');
+  const st = $('#hubInStatus'), list = $('#hubInList');
+  st.classList.remove('err'); st.textContent = '불러오는 중…';
+  list.innerHTML = '';
+  try {
+    const d = await hubCall({ action: 'list', key: state.settings.hubAdminKey });
+    st.textContent = d.items.length ? `${d.items.length}개` : '아직 올라온 카드뉴스가 없어요';
+    d.items.forEach(it => {
+      const dt = new Date(it.createdAt);
+      const strip = h('div', { class: 'hub-strip' }); hubStrip(strip, it.thumbs, it.cardH);
+      const openBtn = h('button', { class: 'primary' }, '열기');
+      const delBtn = h('button', {}, '휴지통으로');
+      openBtn.onclick = () => openHubItem(it, openBtn);
+      delBtn.onclick = async () => {
+        if (!confirm(`'${it.name}'을(를) 구글 드라이브 휴지통으로 옮길까요? (30일 안에 드라이브에서 되살릴 수 있어요)`)) return;
+        delBtn.disabled = true;
+        try { await hubCall({ action: 'delete', key: state.settings.hubAdminKey, id: it.id }); openHubInbox(); }
+        catch (e) { toast('지우지 못했어요: ' + e.message, 5000); delBtn.disabled = false; }
+      };
+      list.append(h('div', { class: 'hub-item' },
+        strip,
+        h('div', { class: 'meta' },
+          h('div', {}, h('div', { class: 't' }, it.name || '이름 없음'),
+            h('div', { class: 'd' }, `${dt.getMonth() + 1}/${dt.getDate()} ${String(dt.getHours()).padStart(2, '0')}:${String(dt.getMinutes()).padStart(2, '0')} · 카드 ${it.slides}장${it.cardH === 1080 ? ' · 1:1' : ''} · ${((it.size || 0) / 1048576).toFixed(1)}MB`)),
+          h('div', { class: 'acts' }, openBtn, delBtn))));
+    });
+  } catch (e) { st.textContent = '목록을 못 불러왔어요: ' + e.message; st.classList.add('err'); }
+}
+async function openHubItem(it, btn) {
+  if (!state.project.name && !confirm('지금 작업은 이름 붙여 저장되지 않았어요. 그래도 받은 카드뉴스를 열까요?\n(지금 작업을 남기려면 취소 → 💾 저장)')) return;
+  btn.disabled = true;
+  busy(true, '받은 카드뉴스 여는 중…');
+  try {
+    const d = await hubCall({ action: 'get', key: state.settings.hubAdminKey, id: it.id });
+    const data = JSON.parse(d.data);
+    await applyProjectData(data, it.name);
+    closeModal('hubInModal');
+    toast(`'${it.name}' 열었어요. 💾 저장하면 내 프로젝트 폴더에도 들어가요`, 5000);
+  } catch (e) { toast('열지 못했어요: ' + e.message, 6000); } finally { busy(false); btn.disabled = false; }
+}
+// 내 편집기 전용 설정 파일(hub_config.json: 주소·업로드 코드·관리자 코드)이 있으면 반영
+async function loadHubConfig() {
+  try {
+    const r = await fetch('hub_config.json', { cache: 'no-store' });
+    if (!r.ok) return;
+    const c = await r.json();
+    ['hubUrl', 'hubKey', 'hubAdminKey'].forEach(k => { if (c[k]) state.settings[k] = c[k]; });
+    saveSettings();
+  } catch (e) { /* 없음 */ }
+}
+
 function updateProjName() {
   const el = $('#projName');
   if (!el || !state.project) return;
   el.textContent = state.project.name || '이름 없음';
   el.classList.toggle('unsaved', !state.project.name);
+}
+// 첫 장 문구 (제목 레이어 → 없으면 첫 글자 레이어) — 공유함 제목용
+function firstCardTitle() {
+  let t = '', any = '';
+  walkObjs((slides()[0] && slides()[0].json.objects) || [], o => {
+    if (o.type !== 'i-text' && o.type !== 'textbox') return;
+    if (!t && o.layerName === '제목') t = o.text;
+    if (!any && (o.text || '').trim()) any = o.text;
+  });
+  t = (t || any || '').replace(/\*/g, '').replace(/\s+/g, ' ').trim().slice(0, 60);
+  const d = new Date();
+  return t || `카드뉴스 ${d.getMonth() + 1}.${d.getDate()}`;
 }
 function suggestProjectName() {
   // 첫 카드 제목 첫 줄 (별표 빼고) → 없으면 날짜
@@ -566,6 +685,9 @@ function openSettings() {
   $('#setApiKey').value = s.apiKey || '';
   $('#setModel').value = s.model || 'claude-sonnet-5-5';
   $('#setSerpKey').value = s.serpApiKey || '';
+  $('#setHubUrl').value = s.hubUrl || '';
+  $('#setHubKey').value = s.hubKey || '';
+  $('#setHubAdminKey').value = s.hubAdminKey || '';
   $('#setExportDir').value = s.exportDir || '';
   $('#setExportCaption').checked = !!s.exportWithCaption;
   $('#setTmdbKey').value = s.tmdbKey || '';
@@ -584,6 +706,10 @@ async function applySettings() {
   s.apiKey = $('#setApiKey').value.trim();
   s.model = $('#setModel').value.trim() || 'claude-sonnet-5-5';
   s.serpApiKey = $('#setSerpKey').value.trim();
+  s.hubUrl = $('#setHubUrl').value.trim();
+  s.hubKey = $('#setHubKey').value.trim();
+  s.hubAdminKey = $('#setHubAdminKey').value.trim();
+  syncHubButtons();
   s.exportDir = $('#setExportDir').value.trim();
   s.exportWithCaption = $('#setExportCaption').checked;
   s.tmdbKey = $('#setTmdbKey').value.trim();
@@ -686,6 +812,8 @@ async function applySharedConfig() {
     const r = await fetch('shared_config.json', { cache: 'no-store' });
     if (!r.ok) return;
     const cfg = await r.json();
+    // 공유함 주소·업로드 코드는 비어 있으면 언제든 채움 (나중에 추가된 기능이라)
+    ['hubUrl', 'hubKey'].forEach(k => { if (cfg[k] && !state.settings[k]) { state.settings[k] = cfg[k]; saveSettings(); } });
     // 처음 한 번만 적용 (이후 받은 사람이 설정에서 바꾼 값은 그대로 둠). 키는 비어 있을 때만 채움
     if (state.settings.sharedApplied) return;
     ['apiKey', 'serpApiKey', 'tmdbKey'].forEach(k => { if (cfg[k] && !state.settings[k]) state.settings[k] = cfg[k]; });

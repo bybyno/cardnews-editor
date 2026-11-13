@@ -223,7 +223,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         return self._json(404, {'error': 'unknown api'})
 
 
-SERVER_VERSION = 8  # 편집기(js/search.js의 NEED_SERVER)와 맞춰서 올림 — 낮으면 편집기가 재시작 안내
+SERVER_VERSION = 9  # 편집기(js/search.js의 NEED_SERVER)와 맞춰서 올림 — 낮으면 편집기가 재시작 안내
 SAVE_ROOT = '받은 포스트'   # 인스타에서 받은 사진·캡션 저장 폴더 (편집기 폴더 안)
 IG_APP_ID = '936619743392459'
 IMG_HOSTS = ('cdninstagram.com', 'fbcdn.net')
@@ -338,7 +338,7 @@ def cutout(data_url, model):
 # update.json: {"repo": "계정/저장소", "branch": "main"} / version.json: {"version": "2026.11.10.1530"}
 # 원본 폴더(.git 있음)는 업데이트하지 않음. 업데이트해도 키·프로젝트·받은 포스트는 건드리지 않음.
 # start.bat/설치.bat 은 실행 중에 바꾸면 깨질 수 있어서 자동 업데이트에서 제외
-UPDATE_KEEP = ('shared_config.json', '프로젝트/', '받은 포스트/', '.git/', '.claude/', 'start.bat', '설치.bat')
+UPDATE_KEEP = ('shared_config.json', 'hub_config.json', '공유함_구글스크립트.txt', '프로젝트/', '받은 포스트/', '.git/', '.claude/', 'start.bat', '설치.bat')
 
 
 def _read_json_file(path, default=None):
@@ -418,6 +418,8 @@ DEFAULT_EXPORT_ROOT = _default_export_root()
 
 SHARE_EXCLUDE_DIRS = {'받은 포스트', '프로젝트', '.claude', '__pycache__', '.git'}
 SHARE_KEYS = ('apiKey', 'serpApiKey', 'tmdbKey', 'model', 'prompt')
+# 공유 압축파일에 넣지 않는 파일 (내 키·관리자 코드)
+SHARE_EXCLUDE_FILES = {'shared_config.json', 'hub_config.json', '공유함_구글스크립트.txt'}
 
 
 def make_share(data):
@@ -428,12 +430,18 @@ def make_share(data):
         for dp, dns, fns in os.walk(root):
             dns[:] = [d for d in dns if d not in SHARE_EXCLUDE_DIRS]
             for fn in fns:
-                if fn == 'shared_config.json' or fn.endswith(('.tmp', '.zip', '.pyc')):
+                if fn in SHARE_EXCLUDE_FILES or fn.endswith(('.tmp', '.zip', '.pyc')):
                     continue
                 full = os.path.join(dp, fn)
                 z.write(full, os.path.join('카드뉴스편집기', os.path.relpath(full, root)))
+        cfg = {}
         if data.get('includeKeys'):
             cfg = {k: str(v) for k, v in (data.get('config') or {}).items() if k in SHARE_KEYS and v}
+        # 구글 드라이브 공유함: 받은 사람도 📤 업로드 할 수 있게 주소와 '업로드 코드'만 (관리자 코드는 절대 안 넣음)
+        hub = _read_json_file('hub_config.json', {}) or {}
+        if hub.get('hubUrl') and hub.get('hubKey'):
+            cfg['hubUrl'], cfg['hubKey'] = hub['hubUrl'], hub['hubKey']
+        if cfg:
             z.writestr('카드뉴스편집기/shared_config.json', json.dumps(cfg, ensure_ascii=False, indent=2))
     return {'path': out, 'size': os.path.getsize(out)}
 

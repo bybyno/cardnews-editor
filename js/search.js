@@ -3,7 +3,7 @@
 
 let PROXY_OK = false;
 let SERVER_OLD = false;
-const NEED_SERVER = 8;   // server.py의 SERVER_VERSION
+const NEED_SERVER = 9;   // server.py의 SERVER_VERSION
 async function checkProxy() {
   try {
     const r = await fetch('/proxy-ping', { cache: 'no-store' });

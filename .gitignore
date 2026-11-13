@@ -1,5 +1,7 @@
 # 개인 데이터·키는 절대 올리지 않음
 shared_config.json
+hub_config.json
+공유함_구글스크립트.txt
 프로젝트/
 받은 포스트/
 .claude/

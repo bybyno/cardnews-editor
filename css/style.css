@@ -71,6 +71,15 @@ input[type=range] { width: 100%; accent-color: var(--blue); }
 .status a { color: var(--blue); cursor: pointer; }
 .update-btn { background: #2f6b2f; border-color: #4caf50; color: #fff; animation: updPulse 2s ease-in-out infinite; }
 @keyframes updPulse { 50% { box-shadow: 0 0 0 4px rgba(76,175,80,.25); } }
+/* 공유함 */
+.hub-strip { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 4px; }
+.hub-strip img { height: 110px; aspect-ratio: var(--r, 4 / 5); object-fit: cover; border-radius: 5px; background: #000; flex: none; }
+.hub-list { display: grid; gap: 12px; max-height: 62vh; overflow: auto; padding-right: 4px; }
+.hub-item { background: var(--panel2); border: 1px solid var(--line); border-radius: 10px; padding: 12px; display: grid; gap: 8px; }
+.hub-item .meta { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; align-items: center; }
+.hub-item .t { font-weight: 700; font-size: 14px; }
+.hub-item .d { color: var(--muted); font-size: 12px; }
+.hub-item .acts { display: flex; gap: 6px; }
 .share-box { background: #1b1c20; border: 1px solid var(--line); border-radius: 8px; padding: 10px; }
 .share-box .hint b { color: #ff9b9b; }
 .proj-name { max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #cfcfd5; cursor: pointer; padding: 3px 6px; border-radius: 4px; }

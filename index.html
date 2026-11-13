@@ -32,6 +32,8 @@
   <button id="btnUpdate" class="update-btn" style="display:none" title="새 버전 받기">🔔 업데이트 하기</button>
   <span id="taskState" class="task-state" style="display:none"></span>
   <span id="saveState" class="save-state"></span>
+  <button id="btnHubUpload" style="display:none" title="지금 카드뉴스를 공유함(구글 드라이브)에 올리기">📤 업로드</button>
+  <button id="btnHubInbox" style="display:none" title="공유함에 올라온 카드뉴스 보기·열기">📥 받은 카드뉴스</button>
   <button id="btnHelp" title="사용설명서">📖 설명서</button>
   <button id="btnCaption">캡션</button>
   <button id="btnSettings">⚙ 설정</button>
@@ -179,6 +181,9 @@
           <p class="hint">받은 사람은 키를 따로 넣지 않고 바로 써요. <b>요금은 전부 내 계정</b>으로 나가고, 받은 사람이 키를 꺼내 볼 수도 있어요. 믿을 수 있는 사람에게만 주세요.</p>
           <button id="shareMake" class="primary">📦 공유용 압축파일 만들기</button>
         </div>
+        <label class="lbl">공유함 (구글 드라이브)</label>
+        <input type="text" id="setHubUrl" placeholder="공유함 주소 (https://script.google.com/macros/s/…/exec)">
+        <div class="ctrl" style="margin-top:6px"><input type="password" id="setHubKey" placeholder="업로드 코드"><input type="password" id="setHubAdminKey" placeholder="관리자 코드 (내 편집기만)"></div>
         <label class="lbl">버전 · 업데이트</label>
         <div class="ctrl"><span id="verInfo" class="muted">확인 중…</span><button id="verCheck">업데이트 확인</button></div>
         <label class="lbl">내 폰트 추가 (.ttf / .otf / .woff)</label>
@@ -292,10 +297,31 @@
     <div id="projList" class="proj-list"></div>
     <div class="modal-actions">
       <button id="projOpenFolder">📂 프로젝트 폴더 열기</button>
-      <button id="projFromFile" title="다른 곳에 있는 .json 프로젝트 파일 열기">파일에서 열기…</button>
+      <button id="projFromFile" title="다른 곳에 있는 .json 프로젝트 파일 열기 (공유함에서 받은 파일도)">파일에서 열기…</button>
       <span class="spacer"></span>
       <button data-close>닫기</button>
     </div>
+  </div>
+</div>
+
+<!-- 공유함: 업로드 -->
+<div class="modal" id="hubUpModal">
+  <div class="modal-box">
+    <h2>📤 공유함에 올리기</h2>
+    <p class="desc" id="hubUpDesc"></p>
+    <div class="strip hub-strip" id="hubUpStrip"></div>
+    <div id="hubUpStatus" class="status"></div>
+    <div class="modal-actions"><button data-close>취소</button><button id="hubUpGo" class="primary">올리기</button></div>
+  </div>
+</div>
+
+<!-- 공유함: 받은 카드뉴스 -->
+<div class="modal" id="hubInModal">
+  <div class="modal-box wide">
+    <h2>📥 받은 카드뉴스 <span class="muted">— 구글 드라이브 '카드뉴스 공유함' 폴더</span></h2>
+    <div id="hubInStatus" class="status"></div>
+    <div id="hubInList" class="hub-list"></div>
+    <div class="modal-actions"><button id="hubInRefresh">새로고침</button><span class="spacer"></span><button data-close>닫기</button></div>
   </div>
 </div>
 

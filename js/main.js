@@ -24,6 +24,11 @@ function bindUI() {
   $('#projOpenFolder').onclick = () => fetch('/api/project-list').then(r => r.json()).then(d => fetch('/api/open-folder?abs=' + encodeURIComponent(d.folder)))
     .catch(() => toast('폴더를 열지 못했어요'));
   $('#projFromFile').onclick = openProjectFile;
+  // 공유함 (구글 드라이브)
+  $('#btnHubUpload').onclick = openHubUpload;
+  $('#hubUpGo').onclick = doHubUpload;
+  $('#btnHubInbox').onclick = openHubInbox;
+  $('#hubInRefresh').onclick = openHubInbox;
   $('#btnUndo').onclick = undo;
   $('#btnRedo').onclick = redo;
   $('#btnZoomIn').onclick = () => setZoom(state.zoom * 1.15);
@@ -251,6 +256,7 @@ function bindUI() {
       saveSettings();
     }
     await applySharedConfig();   // 공유받은 편집기면 공유자의 키 채우기
+    await loadHubConfig();       // 내 편집기면 공유함 관리자 설정
     await registerCustomFonts();
     await preloadFonts();
     await loadTexture('marble').catch(() => {});
@@ -286,6 +292,7 @@ function bindUI() {
     ensureThumbs();
     $('#saveState').textContent = '자동 저장됨';
     updateProjName();
+    syncHubButtons();
     await checkProxy();
     checkForUpdate();   // 새 버전이 있으면 상단에 '업데이트 하기' 버튼
     handleIgHash();   // 북마크 버튼으로 열렸으면 인스타 게시물 받기
